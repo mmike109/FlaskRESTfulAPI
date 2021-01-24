@@ -1,10 +1,11 @@
 import sqlite3
 
+# Connect to this database
 DATABASE = "./phones_db.db"
 
 
+# if connection is successful create phones table
 def create_connection(db_file):
-    """ create a database connection to a SQLite database """
     conn = None
     try:
         conn = sqlite3.connect(db_file)
@@ -14,7 +15,6 @@ def create_connection(db_file):
         conn.close()
     finally:
         if conn:
-            # if connection is successful create phones table
             create_phones_table = conn.cursor()
             create_phones_table.execute("""CREATE TABLE IF NOT EXISTS phones (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                                             phone_model TEXT NOT NULL,
@@ -23,6 +23,7 @@ def create_connection(db_file):
             conn.close()
 
 
+# Inserts new phone into phone store database when new POST request is initiated
 def insert_new_phone(phone_model, serial_number, color):
     parms = (phone_model, serial_number, color)
     connection = None
@@ -37,6 +38,8 @@ def insert_new_phone(phone_model, serial_number, color):
     except "Error occurred while inserting a new phone" as ev:
         print(ev)
         connection.close()
+
+# Delete a phone from database
 
 
 def delete_phone(id):

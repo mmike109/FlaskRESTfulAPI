@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
+# Default phone list
 phones_list = [
     {
         "id": 0,
@@ -39,7 +40,7 @@ def phones():
             'serial_number': serial_number,
             'color': color
         }
-        
+        # Insert a new phone into the database and add it to the API
         phoneDb.insert_new_phone(phone_model, serial_number, color)
         phones_list.append(new_phone)
         return jsonify(phones_list), 201
