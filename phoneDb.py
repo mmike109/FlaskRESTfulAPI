@@ -4,23 +4,45 @@ import sqlite3
 DATABASE = "./phones_db.db"
 
 
-# if connection is successful create phones table
-def create_connection(db_file):
-    conn = None
+def db_connection_cursor():
+    db_conn = None
     try:
-        conn = sqlite3.connect(db_file)
-        print(sqlite3.version)
+        db_conn = sqlite3.connect(DATABASE)
+    except "ERROR while connecting to database" as err:
+        print(err)
+        db_conn.close()
+    finally:
+        if db_conn:
+            db_connect = db_conn.cursor()
+            return db_connect
+
+
+def db_connection():
+    connection = None
+    try:
+        connection = sqlite3.connect(DATABASE)
+    except "Error connecting to db" as e:
+        print(e)
+        connection.close()
+    finally:
+        if connection:
+            return connection
+
+
+# if connection is successful create phones table
+def create_connection():
+    try:
+        db_connection_cursor()
     except "Error occurred while creating dbFile" as e:
         print(e)
-        conn.close()
+        db_connection_cursor().close()
     finally:
-        if conn:
-            create_phones_table = conn.cursor()
-            create_phones_table.execute("""CREATE TABLE IF NOT EXISTS phones (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        if db_connection_cursor():
+            db_connection_cursor().execute("""CREATE TABLE IF NOT EXISTS phones (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                                             phone_model TEXT NOT NULL,
                                             serial_number TEXT NOT NULL, color TEXT NOT NULL)""")
 
-            conn.close()
+            db_connection_cursor().close()
 
 
 # Inserts new phone into phone store database when new POST request is initiated
@@ -39,19 +61,16 @@ def insert_new_phone(phone_model, serial_number, color):
         print(ev)
         connection.close()
 
+
 # Delete a phone from database
-
-
 def delete_phone(id):
-    con = None
     try:
-        con = sqlite3.connect(DATABASE)
-        if con:
-            delete_phones = con.cursor()
-            delete_phones.execute("DELETE FROM phones WHERE id=" + id)
-            con.commit()
+        db_connection_cursor()
+        if db_connection_cursor():
+            db_connection_cursor().execute("DELETE FROM phones WHERE id=" + id)
+            db_connection_cursor().commit()
             print("phone deleted")
-            con.close()
+            db_connection_cursor().close()
     except "Error while deleting a phone" as eve:
         print(eve)
-        con.close()
+        db_connection_cursor().close()
