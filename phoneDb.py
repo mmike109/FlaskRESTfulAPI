@@ -2,6 +2,7 @@ import sqlite3
 
 # Connect to this database
 DATABASE = "./phones_db.db"
+CONNECTION = None
 
 
 def db_connection_cursor():
@@ -15,18 +16,6 @@ def db_connection_cursor():
         if db_conn:
             db_connect = db_conn.cursor()
             return db_connect
-
-
-def db_connection():
-    connection = None
-    try:
-        connection = sqlite3.connect(DATABASE)
-    except "Error connecting to db" as e:
-        print(e)
-        connection.close()
-    finally:
-        if connection:
-            return connection
 
 
 # if connection is successful create phones table
@@ -48,29 +37,45 @@ def create_connection():
 # Inserts new phone into phone store database when new POST request is initiated
 def insert_new_phone(phone_model, serial_number, color):
     parms = (phone_model, serial_number, color)
-    connection = None
     try:
-        connection = sqlite3.connect(DATABASE)
-        if connection:
-            insert_phone = connection.cursor()
+        CONNECTION = sqlite3.connect(DATABASE)
+        if CONNECTION:
+            insert_phone = CONNECTION.cursor()
             insert_phone.execute("INSERT INTO phones (phone_model, serial_number, color) VALUES (?, ?, ?)", parms)
-            connection.commit()
+            CONNECTION.commit()
             print("Insert successful")
-            connection.close()
+            CONNECTION.close()
     except "Error occurred while inserting a new phone" as ev:
         print(ev)
-        connection.close()
+        CONNECTION.close()
+
+
+# Updates a phone
+def update_phone(phone_model, serial_number, color, id):
+    update_parms = (phone_model, serial_number, color, id)
+    try:
+        CONNECTION = sqlite3.connect(DATABASE)
+        if CONNECTION:
+            update_phones = CONNECTION.cursor()
+            update_phones.execute("""UPDATE phones SET phone_model=?, serial_number=?, color=?
+            WHERE id=?""", update_parms)
+            print(update_parms)
+            CONNECTION.commit()
+
+    except "Error occured while updating phone #" + id as error:
+        print(error)
+        CONNECTION.close()
 
 
 # Delete a phone from database
 def delete_phone(id):
     try:
-        db_connection_cursor()
-        if db_connection_cursor():
-            db_connection_cursor().execute("DELETE FROM phones WHERE id=" + id)
-            db_connection_cursor().commit()
+        CONNECTION = sqlite3.connect(DATABASE)
+        if CONNECTION:
+            CONNECTION.cursor().execute("DELETE FROM phones WHERE id=?", (id,))
+            CONNECTION.commit()
             print("phone deleted")
-            db_connection_cursor().close()
+            CONNECTION.close()
     except "Error while deleting a phone" as eve:
         print(eve)
-        db_connection_cursor().close()
+        CONNECTION.close()

@@ -29,14 +29,28 @@ def phones():
 def find_phone(id):
     phone = None
     if request.method == 'GET':
-        phoneDb.db_connection_cursor().execute("SELECT FROM phones WHERE id=?", (id,))
-        rows = phoneDb.db_connection_cursor().execute("SELECT * FROM phones")
-        for p in phoneDb.db_connection_cursor().execute("SELECT * FROM phones"):
+        rows = phoneDb.db_connection_cursor().execute("SELECT * FROM phones WHERE id=?", (id,))
+        for p in rows:
             phone = p
         if phone is not None:
             return jsonify(phone), 200
         else:
-            return "Error occurred"
+            return "Error occurred", 404
+    if request.method == 'PUT':
+        phone_model = request.form['phone_model']
+        serial_number = request.form['serial_number']
+        color = request.form['color']
+        updated_phone = {
+            "id": id,
+            "phone_model": phone_model,
+            "serial_number": serial_number,
+            "color": color
+        }
+        phoneDb.update_phone(phone_model, serial_number, color, id)
+        return jsonify(updated_phone)
+    if request.method == 'DELETE':
+        phoneDb.delete_phone(id)
+        return "Phone with id: {} has been deleted successfully".format(id), 200
 
 
 if __name__ == '__main__':
