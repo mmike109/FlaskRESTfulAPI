@@ -1,4 +1,7 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import phoneDb
+import multiprocessing
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -53,6 +56,11 @@ def find_phone(id):
         return "Phone with id: {} has been deleted successfully".format(id), 200
 
 
+def run_concurrently():
+    executor = ThreadPoolExecutor(multiprocessing.cpu_count())
+    executor.submit(phoneDb.create_connection())
+    executor.submit(app.run(port=3000, debug=True))
+
+
 if __name__ == '__main__':
-    phoneDb.create_connection()
-    app.run(port=3000, debug=True)
+    run_concurrently()
